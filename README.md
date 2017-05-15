@@ -27,9 +27,18 @@ if you do, old threads will no longer be synced. More importantly,
 replies to old theads on the Twitter side will not be posted on
 Mastodon at all.
 
+To customize options, you can either modify directly the
+`MastodonToTwitter.py` file, the configuration option being
+at the top of the script (best option if you want to tweak
+a few things and forget this), or create a `mtt_config.py`
+file and copy the configuration variables you want to change
+there (best option if you want to be able to update this using
+`git pull` and don't want to alter the core files).
+
 ## Docker
 
-To setup MastodonToTwitter first run the following command and follow instructions
+To run this as a docker app, first run the app once to generate
+the mtt files, then build the docker container:
 ```
 docker-compose run --rm mtt
 ```
@@ -40,9 +49,10 @@ docker-compose up -d
 
 ## Systemd
 
-The `MastodonToTwitter.service` file is a systemd service.
-You can edit it to change the install path, copy it to `/etc/systemd/system/`,
-and then use `systemctl start|stop|restart|status MastodonToTwitter` and
+The `MastodonToTwitter.service.sample` file is a systemd service.
+You can copy it to `MastodonToTwitter.service`, edit it to change the
+install path, symlink it to `/etc/systemd/system/`, and then use
+`systemctl start|stop|restart|status MastodonToTwitter` and
 `journalctl -u MastodonToTwitter.service` to run this as a simple service
 
 ## Heroku
@@ -61,6 +71,7 @@ worker: python3 MastodonToTwitter.py
 ```
 Commit and push your changes to heroku master.
 
-Open a bash shell on heroku with `heroku run bash` and follow the basic usage instructions to generate your tokens.
+Open a bash shell on heroku with `heroku run bash` and follow the basic usage
+instructions to generate your tokens.
 
 Exit bash and scale your heroku instance ` heroku ps:scale worker=1` to get things going.
