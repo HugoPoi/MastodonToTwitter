@@ -59,6 +59,11 @@ TWEET_CW_REGEXP = re.compile(r'\[(?:(?:(?:C|T)W)|SPOIL(?:ER)?)(?:[\s\-\.⋅,:–
 TWEET_CW_ALLOW_MULTI = True
 TWEET_CW_SEPARATOR = ', '
 
+# The text to prepend to tweets, it the corresponding toot is a
+# boost/reblog. {} is the full username (acct) user@instance
+# To disable prefixed boost from Mastodon to Twitter, set to None.
+TWEET_BOOST_PREFIX = 'BOOST {}:\n'
+
 # Some helpers copied out from python-twitter, because they're broken there
 URL_REGEXP = re.compile((
     r'('
@@ -307,12 +312,15 @@ while True:
             content_clean = re.sub(MEDIA_REGEXP, "", content_clean)
 
             # Don't cross-post replies
-            if len(content_clean) != 0 and content_clean[0] == '@':
+            if len(content_clean) != 0 and content_clean[0] == '@' and not toot['reblog']:
                 print('Skipping toot "' + content_clean + '" - is a reply.')
                 continue
 
             if TWEET_CW_PREFIX and toot['spoiler_text']:
                 content_clean = TWEET_CW_PREFIX.format(toot['spoiler_text']) + content_clean
+
+            if TWEET_BOOST_PREFIX and toot['reblog']:
+                content_clean = TWEET_BOOST_PREFIX.format(toot['reblog']['account']['acct']) + content_clean
 
             # Split toots, if need be, using Many magic numbers.
             content_parts = []
@@ -326,7 +334,7 @@ while True:
                             space_left = 135 - calc_expected_status_length(current_part, short_url_length = url_length) - 1
 
 
-                            if SPLIT_ON_TWITTER:
+                            if SPLIT_ON_TWITTER and not toot['reblog']:
                                 # Want to split word?
                                 if len(next_word) > 30 and space_left > 5 and not twitter.twitter_utils.is_url(next_word):
                                     current_part = current_part + " " + next_word[:space_left]
