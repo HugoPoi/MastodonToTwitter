@@ -1,6 +1,6 @@
 # Warning
-This code is currently very un-maintained. If somebody who preferably actually 
-uses it (I do not) wants to take over, I'd apperciate that  just let me know.
+This repository is based on `Halcy`'s work. I currently do refactoring
+of code for including new features. I will do a proper release :-D.
 
 # MastodonToTwitter
 Mastodon <-> Twitter cross-poster.
