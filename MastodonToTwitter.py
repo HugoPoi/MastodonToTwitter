@@ -244,7 +244,7 @@ while True:
             # Trim out media URLs
             content_clean = re.sub(MEDIA_REGEXP, "", content_clean)
 
-            # Don't cross-post replies
+            # Don't cross-post replies or only if toot is a boost (reblog)
             if len(content_clean) != 0 and content_clean[0] == '@' and not toot['reblog']:
                 print('Skipping toot "' + content_clean + '" - is a reply.')
                 continue
@@ -260,7 +260,8 @@ while True:
             if calc_expected_status_length(content_clean, short_url_length = url_length) > 140:
                 print('Toot bigger 140 characters, need to split...')
                 content_parts = split_toot(content_clean, max_url_length = url_length, multi_split = SPLIT_ON_TWITTER and not toot['reblog'])
-                if not (SPLIT_ON_TWITTER and not toot['reblog'])
+                # Append toot url if split disable or toot is a boost (reblog)
+                if not SPLIT_ON_TWITTER or toot['reblog']
                     content_parts[-1] += toot['url']
             else:
                 print('Toot smaller than 140 chars, posting directly...')
@@ -283,8 +284,6 @@ while True:
                 for i in range(len(content_parts)):
                     media_ids = []
                     content_tweet = content_parts[i]
-                    if SPLIT_ON_TWITTER:
-                        content_tweet += " --"
 
                     # Last content part: Upload media, no -- at the end
                     if i == len(content_parts) - 1:

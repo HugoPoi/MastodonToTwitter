@@ -17,34 +17,35 @@ def calc_expected_status_length(status, short_url_length = 23):
         status_length = status_length - replaced_chars + (short_url_length * len(match))
     return status_length
 
+TWEET_MAX_SIZE = 135 # '… ' add 2 chars and ' --' add 3 chars, final max size 140 CQFD
 def split_toot(content_clean, max_url_length, multi_split = False):
     content_parts = []
     current_part = ""
     for next_word in content_clean.split(" "):
         # Need to split here?
-        if calc_expected_status_length(current_part + " " + next_word, short_url_length = max_url_length) > 135:
+        if calc_expected_status_length(current_part + " " + next_word, short_url_length = max_url_length) > TWEET_MAX_SIZE:
             print("new part")
-            space_left = 135 - calc_expected_status_length(current_part, short_url_length = max_url_length) - 1
+            space_left = TWEET_MAX_SIZE - calc_expected_status_length(current_part, short_url_length = max_url_length) - 1
 
 
             if multi_split:
                 # Want to split word?
                 if len(next_word) > 30 and space_left > 5 and not twitter.twitter_utils.is_url(next_word):
                     current_part = current_part + " " + next_word[:space_left]
-                    content_parts.append(current_part)
+                    content_parts.append(current_part + ' --')
                     current_part = next_word[space_left:]
                 else:
-                    content_parts.append(current_part)
+                    content_parts.append(current_part + ' --')
                     current_part = next_word
 
                 # Split potential overlong word in current_part
-                while len(current_part) > 135:
-                    content_parts.append(current_part[:135])
-                    current_part = current_part[135:]
+                while len(current_part) > TWEET_MAX_SIZE:
+                    content_parts.append(current_part[:TWEET_MAX_SIZE])
+                    current_part = current_part[TWEET_MAX_SIZE:]
             else:
                 print('In fact we just cut')
                 space_for_suffix = len('… ') + max_url_length
-                content_parts.append(current_part[:-space_for_suffix] + '… ')
+                content_parts.append(current_part[:-space_for_suffix] + '… ' + ' --')
                 current_part = ''
                 break
         else:
